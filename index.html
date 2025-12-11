@@ -48,7 +48,8 @@
     </style>
 </head>
 <body class="font-sans text-gray-900 antialiased">
-    <div class="container mx-auto p-4 md:p-8 max-w-7xl pb-20"> <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b border-gray-200 pb-6 gap-4" id="headerApp" style="display: none;">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl pb-20"> 
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b border-gray-200 pb-6 gap-4" id="headerApp" style="display: none;">
             <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 flex items-center">
                 <span class="text-3xl mr-2 text-indigo-600">𝄞</span> Abraão 2.0
             </h1>
@@ -1204,7 +1205,12 @@
                 const file = document.getElementById('fileInputCsv').files[0];
                 if (file) { importarRepertorioCSV(file); } else { alert("Selecione um arquivo CSV."); }
             });
-            document.getElementById('fecharModalImport').addEventListener('click', () => modalImport.classList.add('hidden'));
+            
+            // FIX: Removido .modal-active ao fechar import
+            document.getElementById('fecharModalImport').addEventListener('click', () => {
+                modalImport.classList.add('hidden');
+                modalImport.classList.remove('modal-active'); // ADDED THIS
+            });
             
             // --- Gerenciamento de Repertório LISTENERS ---
             document.getElementById('btnGerenciarRepertorio').addEventListener('click', () => {
