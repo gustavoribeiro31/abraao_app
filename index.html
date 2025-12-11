@@ -25,6 +25,7 @@
             background-color: var(--color-gray-bg); 
             font-family: 'Inter', sans-serif;
             color: var(--color-dark);
+            -webkit-tap-highlight-color: transparent; /* Remove highlight azul no mobile */
         }
         .shadow-panel { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03); }
         .btn-primary { background-color: var(--color-primary); transition: background-color 0.15s; }
@@ -46,29 +47,27 @@
         }
     </style>
 </head>
-<body class="font-sans">
-    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
-
-        <header class="mb-10 flex justify-between items-center border-b border-gray-200 pb-4" id="headerApp" style="display: none;">
-            <h1 class="text-4xl font-extrabold text-gray-900 flex items-center">
-                <span class="text-3xl mr-2 text-indigo-600">𝄞</span> Abraão App 2.0
+<body class="font-sans text-gray-900 antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl pb-20"> <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b border-gray-200 pb-6 gap-4" id="headerApp" style="display: none;">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 flex items-center">
+                <span class="text-3xl mr-2 text-indigo-600">𝄞</span> Abraão 2.0
             </h1>
             
-            <div class="flex space-x-3 items-center">
-                <span id="userRoleDisplay" class="text-xs text-gray-600 font-semibold px-3 py-1 rounded-full border border-gray-300"></span>
+            <div class="flex flex-wrap justify-center gap-2 md:gap-3 items-center">
+                <span id="userRoleDisplay" class="text-xs text-gray-600 font-semibold px-3 py-1 rounded-full border border-gray-300 w-full text-center md:w-auto mb-2 md:mb-0"></span>
                 
-                <button id="btnGerenciarRepertorio" class="bg-indigo-400 hover:bg-indigo-500 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-sm" data-admin>
-                    ⚙️ Gerenciar Repertório
+                <button id="btnGerenciarRepertorio" class="bg-indigo-400 hover:bg-indigo-500 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-sm flex-grow md:flex-grow-0" data-admin>
+                    ⚙️ Repertório
                 </button>
                 
-                <button id="btnImportarCsv" class="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-sm" data-admin>
-                    📂 Importar Repertório (.csv)
+                <button id="btnImportarCsv" class="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-sm flex-grow md:flex-grow-0" data-admin>
+                    📂 CSV
                 </button>
 
-                <button id="btnNovoCulto" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-lg transition duration-200">
-                    + Novo Culto
+                <button id="btnNovoCulto" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-lg transition duration-200 flex-grow md:flex-grow-0">
+                    + Culto
                 </button>
-                <button id="btnLogout" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-lg transition duration-150">
+                <button id="btnLogout" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-lg transition duration-150 flex-grow md:flex-grow-0">
                     Sair
                 </button>
             </div>
@@ -76,23 +75,23 @@
 
         <main id="mainContent">
             
-            <div id="loginView" class="min-h-screen flex items-center justify-center bg-gray-50">
-                <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200">
-                    <h2 class="text-4xl font-extrabold text-gray-900 mb-6 text-center">
+            <div id="loginView" class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+                <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 text-center">
                         <span class="text-3xl mr-2 text-indigo-600">𝄞</span> Login
                     </h2>
-                    <div id="loginStatus" class="mb-4 text-center"></div>
+                    <div id="loginStatus" class="mb-4 text-center text-sm"></div>
 
                     <form id="loginForm">
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2" for="loginEmail">E-mail</label>
-                            <input type="email" id="loginEmail" required class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-900 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                            <input type="email" id="loginEmail" required class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-900 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 text-base"/>
                         </div>
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2" for="loginPassword">Senha</label>
-                            <input type="password" id="loginPassword" required class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-900 mb-3 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                            <input type="password" id="loginPassword" required class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-900 mb-3 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 text-base"/>
                         </div>
-                        <button type="submit" id="loginButton" class="w-full btn-primary text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
+                        <button type="submit" id="loginButton" class="w-full btn-primary text-white font-bold py-3 rounded-lg shadow-md transition duration-200 text-base">
                             Entrar
                         </button>
                     </form>
@@ -100,32 +99,31 @@
             </div>
 
             <div id="dashboardView" style="display: none;">
-                <div class="bg-white p-6 rounded-xl shadow-panel border border-gray-100">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-5 pb-2 border-b border-gray-200">Próximos Cultos & Histórico</h2>
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-panel border border-gray-100">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-5 pb-2 border-b border-gray-200">Próximos Cultos & Histórico</h2>
                     <div id="listaCultos" class="space-y-4">
                         </div>
                 </div>
             </div>
 
             <div id="setlistView" style="display: none;">
-                <button id="btnVoltarHistorico" class="mb-4 text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center">&larr; Voltar ao Histórico</button>
+                <button id="btnVoltarHistorico" class="mb-4 text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center">&larr; Voltar</button>
 
-                <div class="bg-white p-6 rounded-xl shadow-panel border border-gray-100">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2" id="setlistTitle">Montando Setlist: Culto [Data]</h2>
-                    <p class="text-sm text-gray-500 mb-4 italic">*Arraste os cards para reordenar a lista.</p>
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-panel border border-gray-100">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-2 leading-tight" id="setlistTitle">Montando Setlist</h2>
+                    <p class="text-xs md:text-sm text-gray-500 mb-4 italic">*Arraste os cards para reordenar.</p>
 
                     <div id="setlistCardsContainer" class="space-y-3">
                         </div>
 
-                    <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end space-x-3">
-                        <button id="btnExportarSetlist" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 text-sm rounded-lg shadow-md transition duration-150">
-                            📥 Exportar Setlist
+                    <div class="mt-6 pt-4 border-t border-gray-200 flex flex-col md:flex-row justify-end gap-3">
+                        <button id="btnAdicionarManual" class="btn-secondary-light font-medium py-3 px-4 text-sm rounded-lg shadow-sm w-full md:w-auto text-center">
+                            🔍 Buscar / Adicionar
                         </button>
-                        
-                        <button id="btnAdicionarManual" class="btn-secondary-light font-medium py-2 px-4 text-sm rounded-lg shadow-sm">
-                            🔍 Buscar e Adicionar
+                        <button id="btnExportarSetlist" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 text-sm rounded-lg shadow-md transition duration-150 w-full md:w-auto text-center">
+                            📥 Exportar Texto
                         </button>
-                        <button id="btnSalvarSetlist" class="btn-primary text-white font-bold py-2 px-4 text-sm rounded-lg shadow-md">
+                        <button id="btnSalvarSetlist" class="btn-primary text-white font-bold py-3 px-4 text-sm rounded-lg shadow-md w-full md:w-auto text-center">
                             Salvar Setlist
                         </button>
                     </div>
@@ -134,73 +132,74 @@
             
         </main>
 
-        <div id="modalNovoCulto" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
-            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
+        <div id="modalNovoCulto" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md relative">
                 <h3 class="text-xl font-bold mb-4 border-b pb-2">Planejar Novo Culto</h3>
                 <input type="hidden" id="cultoEditId">
-                <input type="date" id="inputData" class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                <input type="text" id="inputNome" placeholder="Nome do Culto (Ex: Domingo Noite)" class="w-full p-3 border border-gray-300 rounded-lg mb-6 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                <div class="flex justify-end space-x-2">
-                    <button type="button" id="fecharModal" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
-                    <button type="button" id="iniciarSelecao" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Iniciar Seleção</button>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                <input type="date" id="inputData" class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-base focus:ring-indigo-500 focus:border-indigo-500" required>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Culto</label>
+                <input type="text" id="inputNome" placeholder="Ex: Domingo Noite" class="w-full p-3 border border-gray-300 rounded-lg mb-6 text-base focus:ring-indigo-500 focus:border-indigo-500" required>
+                <div class="flex flex-col-reverse md:flex-row justify-end gap-2">
+                    <button type="button" id="fecharModal" class="btn-secondary-light font-medium py-3 px-4 rounded-lg text-sm w-full md:w-auto">Cancelar</button>
+                    <button type="button" id="iniciarSelecao" class="btn-primary text-white font-bold py-3 px-4 rounded-lg text-sm w-full md:w-auto">Iniciar Seleção</button>
                 </div>
             </div>
         </div>
 
         <div id="modalBuscaMusica" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
             <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
-                <h3 class="text-xl font-bold mb-4 border-b pb-2">Buscar e Adicionar Música</h3>
-                <input type="text" id="buscaInput" placeholder="Digite o nome, artista ou categoria..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2">Buscar Música</h3>
+                <input type="text" id="buscaInput" placeholder="Nome, artista ou categoria..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-base focus:ring-indigo-500 focus:border-indigo-500">
                 
-                <div id="resultadosBusca" class="flex-grow overflow-y-auto space-y-2 mb-4">
+                <div id="resultadosBusca" class="flex-grow overflow-y-auto space-y-2 mb-4 pr-1">
                     </div>
                 
-                <div class="flex justify-end space-x-2 border-t pt-4">
-                    <button type="button" id="fecharModalBusca" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Fechar</button>
+                <div class="flex justify-end pt-4 border-t">
+                    <button type="button" id="fecharModalBusca" class="btn-secondary-light font-medium py-3 px-4 rounded-lg text-sm w-full md:w-auto">Fechar</button>
                 </div>
             </div>
         </div>
 
         <div id="modalAcaoMusica" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
             <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
-                <h3 class="text-xl font-bold mb-4 border-b pb-2" id="acaoMusicaTitulo"></h3>
+                <h3 class="text-lg font-bold mb-4 border-b pb-2 truncate" id="acaoMusicaTitulo"></h3>
                 
-                <p class="mb-4 text-gray-700 text-sm">O que deseja fazer com esta música no Setlist?</p>
+                <p class="mb-4 text-gray-700 text-sm">O que deseja fazer com esta música?</p>
                 
-                <button type="button" id="btnAcaoAdicionar" class="w-full btn-primary text-white font-medium py-3 rounded-lg mb-3">
+                <button type="button" id="btnAcaoAdicionar" class="w-full btn-primary text-white font-medium py-3 rounded-lg mb-3 shadow-md">
                     + Adicionar ao Final
                 </button>
                 
                 <div class="mt-4 border-t pt-4" id="substituirContainer">
-                    <p class="mb-3 text-sm font-semibold text-gray-700">— OU SUBSTITUIR —</p>
-                    <label for="posicaoSubstituir" class="block text-sm font-medium text-gray-600">Substituir qual posição?</label>
-                    <select id="posicaoSubstituir" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500 mb-3"></select>
-                    <button type="button" id="btnAcaoSubstituir" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg text-sm">
+                    <p class="mb-2 text-sm font-semibold text-gray-700 text-center">— OU SUBSTITUIR —</p>
+                    <select id="posicaoSubstituir" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-base focus:ring-indigo-500 focus:border-indigo-500 mb-3 bg-white"></select>
+                    <button type="button" id="btnAcaoSubstituir" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg text-sm shadow-md">
                         🔄 Substituir
                     </button>
                 </div>
                 
-                <div class="flex justify-end space-x-2 border-t pt-4 mt-4">
-                    <button type="button" id="cancelarModalAcao" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
+                <div class="flex justify-end pt-4 mt-2">
+                    <button type="button" id="cancelarModalAcao" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm w-full">Cancelar</button>
                 </div>
-                
             </div>
         </div>
 
         <div id="modalTransposicao" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
             <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
-                <h3 class="text-xl font-bold mb-4 border-b pb-2">Alterar Tom (<span id="transposicaoMusicaNome"></span>)</h3>
+                <h3 class="text-xl font-bold mb-4 border-b pb-2">Alterar Tom</h3>
                 
+                <p class="mb-1 text-sm text-gray-600">Música: <span id="transposicaoMusicaNome" class="font-semibold text-gray-900"></span></p>
                 <p id="transposicaoTomAtual" class="mb-4 text-sm text-gray-600">Tom Original: <span class="font-bold text-gray-900"></span></p>
 
                 <div class="mb-4">
                     <label for="novoTom" class="block text-sm font-medium text-gray-700">Novo Tom</label>
-                    <input type="text" id="novoTom" required placeholder="Ex: D, Eb, Bm" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="novoTom" required placeholder="Ex: D, Eb" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-base focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 
-                <div class="flex justify-end space-x-2">
-                    <button id="fecharModalTransposicao" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
-                    <button id="salvarNovoTom" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Salvar</button>
+                <div class="flex flex-col-reverse md:flex-row justify-end gap-2">
+                    <button id="fecharModalTransposicao" class="btn-secondary-light font-medium py-3 px-4 rounded-lg text-sm w-full md:w-auto">Cancelar</button>
+                    <button id="salvarNovoTom" class="btn-primary text-white font-bold py-3 px-4 rounded-lg text-sm w-full md:w-auto">Salvar</button>
                 </div>
             </div>
         </div>
@@ -208,31 +207,31 @@
         <div id="modalImport" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
             <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
                 <h3 class="text-xl font-bold mb-4 border-b pb-2">Importar Repertório</h3>
-                <p class="mb-4 text-sm text-gray-600">Importe sua lista do Excel (CSV) para o banco de dados. Colunas: Nome, Artista/Versão, Categoria (Adoração/Palmas), Tom.</p>
+                <p class="mb-4 text-sm text-gray-600">Arquivo CSV (Colunas: Nome, Artista, Categoria, Tom).</p>
                 <input type="file" id="fileInputCsv" accept=".csv" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button type="button" id="fecharModalImport" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
-                    <button type="button" id="iniciarImportacao" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Importar</button>
+                <div class="flex flex-col-reverse md:flex-row justify-end gap-2 mt-4">
+                    <button type="button" id="fecharModalImport" class="btn-secondary-light font-medium py-3 px-4 rounded-lg text-sm w-full md:w-auto">Cancelar</button>
+                    <button type="button" id="iniciarImportacao" class="btn-primary text-white font-bold py-3 px-4 rounded-lg text-sm w-full md:w-auto">Importar</button>
                 </div>
             </div>
         </div>
         
         <div id="modalGerenciarRepertorio" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
             <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 class="text-xl font-bold">Gerenciar Repertório (Total: <span id="totalMusicas">0</span>)</h3>
-                    <button id="btnAddNewMusica" class="bg-green-600 hover:bg-green-700 text-white text-sm py-1 px-3 rounded-lg shadow-md">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-4 border-b pb-2 gap-2">
+                    <h3 class="text-lg md:text-xl font-bold">Gerenciar Repertório (<span id="totalMusicas">0</span>)</h3>
+                    <button id="btnAddNewMusica" class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded-lg shadow-md w-full md:w-auto">
                         + Nova Música
                     </button>
                 </div>
                 
-                <input type="text" id="filtroRepertorio" placeholder="Filtrar por nome, artista ou tom..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <input type="text" id="filtroRepertorio" placeholder="Filtrar..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-base focus:ring-indigo-500 focus:border-indigo-500">
                 
-                <div id="listaRepertorio" class="flex-grow overflow-y-auto space-y-2 mb-4">
+                <div id="listaRepertorio" class="flex-grow overflow-y-auto space-y-2 mb-4 pr-1">
                     </div>
                 
-                <div class="flex justify-end space-x-2 border-t pt-4">
-                    <button type="button" id="fecharModalGerenciar" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Fechar</button>
+                <div class="flex justify-end border-t pt-4">
+                    <button type="button" id="fecharModalGerenciar" class="btn-secondary-light font-medium py-3 px-4 rounded-lg text-sm w-full md:w-auto">Fechar</button>
                 </div>
             </div>
         </div>
@@ -243,30 +242,30 @@
                 <form id="formEditarMusica">
                     <input type="hidden" id="editMusicaId">
                     <div class="mb-3">
-                        <label for="editMusicaNome" class="block text-sm font-medium text-gray-700">Nome da Música</label>
-                        <input type="text" id="editMusicaNome" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <label for="editMusicaNome" class="block text-sm font-medium text-gray-700">Nome</label>
+                        <input type="text" id="editMusicaNome" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-base focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div class="mb-3">
                         <label for="editMusicaArtista" class="block text-sm font-medium text-gray-700">Artista/Versão</label>
-                        <input type="text" id="editMusicaArtista" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <input type="text" id="editMusicaArtista" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-base focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
-                    <div class="flex space-x-4 mb-4">
+                    <div class="flex flex-col md:flex-row gap-3 mb-4">
                         <div class="flex-1">
                             <label for="editMusicaCategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
-                            <select id="editMusicaCategoria" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <select id="editMusicaCategoria" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-base focus:ring-indigo-500 focus:border-indigo-500 bg-white">
                                 <option value="Adoração">Adoração</option>
                                 <option value="Palmas">Palmas</option>
                             </select>
                         </div>
                         <div class="flex-1">
                             <label for="editMusicaTom" class="block text-sm font-medium text-gray-700">Tom</label>
-                            <input type="text" id="editMusicaTom" required placeholder="Ex: C, Dm, G#" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="text" id="editMusicaTom" required placeholder="Ex: C" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-base focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                     </div>
                     
-                    <div class="flex justify-end space-x-2">
-                        <button type="button" id="cancelarEditarMusica" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
-                        <button type="submit" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Salvar Alterações</button>
+                    <div class="flex flex-col-reverse md:flex-row justify-end gap-2">
+                        <button type="button" id="cancelarEditarMusica" class="btn-secondary-light font-medium py-3 px-4 rounded-lg text-sm w-full md:w-auto">Cancelar</button>
+                        <button type="submit" class="btn-primary text-white font-bold py-3 px-4 rounded-lg text-sm w-full md:w-auto">Salvar</button>
                     </div>
                 </form>
             </div>
@@ -288,9 +287,6 @@
         // -----------------------------------------------------------------
         // 1. CONFIGURAÇÃO (SUAS CHAVES)
         // -----------------------------------------------------------------
-        // ATENÇÃO: Ao hospedar no GitHub Pages, você PRECISA adicionar 
-        // o domínio do GitHub (ex: seuusuario.github.io) no Firebase Console:
-        // Vá em: Authentication -> Settings -> Authorized Domains -> Add Domain
         const firebaseConfig = {
             apiKey: "AIzaSyAx4n299JTMzwNqLfiMRMep2DHx4YzImYE",
             authDomain: "app-abraao.firebaseapp.com",
@@ -385,7 +381,7 @@
                 loginView.style.display = 'flex';
             } else {
                 document.getElementById(viewId).style.display = 'block';
-                headerApp.style.display = 'flex';
+                headerApp.style.display = 'flex'; // flex no header
                 appFooter.style.display = 'block';
                 const isAdmin = userRole === 'admin';
                 document.querySelectorAll('[data-admin]').forEach(el => {
@@ -453,25 +449,26 @@
                 const dataFormatada = new Date(culto.data + 'T12:00:00').toLocaleDateString('pt-BR');
                 const statusColorClass = culto.status === 'Realizado' ? 'bg-green-500 text-white' : 'bg-indigo-500 text-white';
                 
+                // CARD RESPONSIVO: Flex-col no mobile, row no desktop
                 const card = document.createElement('div');
-                card.className = `p-4 bg-white rounded-lg shadow-sm flex justify-between items-center card-base card-${culto.status.toLowerCase()}`;
+                card.className = `p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 card-base card-${culto.status.toLowerCase()}`;
                 card.innerHTML = `
-                    <div>
+                    <div class="w-full sm:w-auto">
                         <p class="font-bold text-base text-gray-900">${culto.nome}</p>
-                        <p class="text-sm text-gray-600">Data: ${dataFormatada} | Músicas: ${culto.setlist_final ? culto.setlist_final.length : 0}</p>
+                        <p class="text-sm text-gray-600 mb-1">Data: ${dataFormatada} | Músicas: ${culto.setlist_final ? culto.setlist_final.length : 0}</p>
                         <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusColorClass}">${culto.status}</span>
                     </div>
-                    <div class="space-x-2 flex items-center">
+                    <div class="flex gap-2 w-full sm:w-auto justify-end">
                         ${culto.status === 'Planejado' && userRole === 'admin' ? `
-                            <button data-id="${culto.id}" data-action="marcar-realizado" class="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded transition duration-150">
-                                ✅ Marcar como Realizado
+                            <button data-id="${culto.id}" data-action="marcar-realizado" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-2 rounded transition duration-150 flex-grow sm:flex-grow-0">
+                                ✅ Realizado
                             </button>
                         ` : ''}
                         
-                        <button data-id="${culto.id}" data-action="edit" class="text-indigo-600 hover:text-indigo-800 text-sm p-1 rounded transition duration-150" data-admin>
+                        <button data-id="${culto.id}" data-action="edit" class="text-indigo-600 hover:text-indigo-800 text-sm p-2 rounded transition duration-150 border border-indigo-100 flex-grow sm:flex-grow-0 text-center" data-admin>
                             ✏️ Editar
                         </button>
-                        <button data-id="${culto.id}" data-action="delete" class="text-red-600 hover:text-red-800 text-sm p-1 rounded transition duration-150" data-admin>
+                        <button data-id="${culto.id}" data-action="delete" class="text-red-600 hover:text-red-800 text-sm p-2 rounded transition duration-150 border border-red-100 flex-grow sm:flex-grow-0 text-center" data-admin>
                             🗑️ Excluir
                         </button>
                     </div>
@@ -730,22 +727,23 @@
             const categoriaCor = musica.categoria === 'Adoração' ? 'text-indigo-600' : 'text-orange-500'; 
             const textColor = 'text-gray-700';
 
+            // CARD SETLIST RESPONSIVO
             return `
-                <div class="p-4 ${bgColor} rounded-lg border shadow-sm flex justify-between items-center cursor-grab"
+                <div class="p-4 ${bgColor} rounded-lg border shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 cursor-grab active:cursor-grabbing"
                     draggable="true" data-index="${index}">
-                    <div class="flex-1 min-w-0">
+                    <div class="flex-1 min-w-0 w-full">
                         <p class="font-bold text-base ${textColor} truncate">
                             <span class="text-2xl font-bold mr-3 ${categoriaCor}">${index + 1}.</span> ${musica.nome} - <span class="text-sm font-semibold text-indigo-600">${musica.tom}</span>
                         </p>
                         <p class="text-xs text-gray-600 truncate">${musica.artista_versao} | ${musica.categoria} 
-                            ${lastDate ? `<span class="text-xs text-gray-500 ml-2 font-medium">📅 Última vez: ${lastDate}</span>` : '<span class="text-xs text-green-600 ml-2 font-medium">🆕 Primeira vez</span>'}
+                            ${lastDate ? `<span class="text-xs text-gray-500 ml-2 font-medium block sm:inline mt-1 sm:mt-0">📅 Última vez: ${lastDate}</span>` : '<span class="text-xs text-green-600 ml-2 font-medium block sm:inline mt-1 sm:mt-0">🆕 Primeira vez</span>'}
                         </p>
                     </div>
-                    <div class="space-x-2 flex-shrink-0">
-                        <button data-index="${index}" data-action="transpor" class="text-indigo-600 hover:text-indigo-800 text-sm p-1 rounded transition duration-150">
+                    <div class="flex gap-2 w-full sm:w-auto justify-end mt-2 sm:mt-0">
+                        <button data-index="${index}" data-action="transpor" class="text-indigo-600 hover:text-indigo-800 text-sm p-2 rounded transition duration-150 border border-indigo-100 flex-grow sm:flex-grow-0 text-center">
                             🎵 Transpor
                         </button>
-                        <button data-index="${index}" data-action="remover" class="text-red-600 hover:text-red-800 text-sm p-1 rounded transition duration-150">
+                        <button data-index="${index}" data-action="remover" class="text-red-600 hover:text-red-800 text-sm p-2 rounded transition duration-150 border border-red-100 flex-grow sm:flex-grow-0 text-center">
                             ✖️ Remover
                         </button>
                     </div>
@@ -1251,6 +1249,4 @@
         }); // Fim do DOMContentLoaded
     </script>
 </body>
-
 </html>
-
