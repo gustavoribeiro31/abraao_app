@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abraão - Gestão de Louvor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕊️</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo customizado */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 4px; }
+        .modal-active { display: flex !important; } 
+        .dragging { opacity: 0.5; border: 2px dashed #4f46e5; background-color: #f3f4f6; }
+        
+        /* Estilo Minimalista e Limpo */
+        :root {
+            --color-primary: #1e40af; /* Azul Escuro (Indigo) */
+            --color-dark: #111827; /* Quase Preto (Fundo de Card) */
+            --color-light: #ffffff;
+            --color-gray-bg: #f9fafb;
+            --color-border: #e5e7eb;
+        }
+        body { 
+            background-color: var(--color-gray-bg); 
+            font-family: 'Inter', sans-serif;
+            color: var(--color-dark);
+        }
+        .shadow-panel { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03); }
+        .btn-primary { background-color: var(--color-primary); transition: background-color 0.15s; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-secondary-light { background-color: #f3f4f6; color: var(--color-dark); }
+        .btn-secondary-light:hover { background-color: #e5e7eb; }
+
+        /* Estilo do Rodapé */
+        #appFooter {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #e5e7eb; /* Gray-200 */
+            border-top: 1px solid #d1d5db; /* Gray-300 */
+            padding: 8px 16px;
+            z-index: 1000;
+            display: none; /* Inicia oculto */
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="mb-10 flex justify-between items-center border-b border-gray-200 pb-4" id="headerApp" style="display: none;">
+            <h1 class="text-4xl font-extrabold text-gray-900 flex items-center">
+                <span class="text-3xl mr-2 text-indigo-600">🕊️</span> Abraão 2.0
+            </h1>
+            
+            <div class="flex space-x-3 items-center">
+                <span id="userRoleDisplay" class="text-xs text-gray-600 font-semibold px-3 py-1 rounded-full border border-gray-300"></span>
+                
+                <button id="btnGerenciarRepertorio" class="bg-indigo-400 hover:bg-indigo-500 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-sm" data-admin>
+                    ⚙️ Gerenciar Repertório
+                </button>
+                
+                <button id="btnImportarCsv" class="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-sm" data-admin>
+                    📂 Importar Repertório (.csv)
+                </button>
+
+                <button id="btnNovoCulto" class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-lg transition duration-200">
+                    + Novo Culto
+                </button>
+                <button id="btnLogout" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-3 text-sm rounded-lg shadow-lg transition duration-150">
+                    Sair
+                </button>
+            </div>
+        </header>
+
+        <main id="mainContent">
+            
+            <div id="loginView" class="min-h-screen flex items-center justify-center bg-gray-50">
+                <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200">
+                    <h2 class="text-4xl font-extrabold text-gray-900 mb-6 text-center">
+                        <span class="text-3xl mr-2 text-indigo-600">🕊️</span> Acessar
+                    </h2>
+                    <div id="loginStatus" class="mb-4 text-center"></div>
+
+                    <form id="loginForm">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="loginEmail">E-mail</label>
+                            <input type="email" id="loginEmail" required class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-900 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="loginPassword">Senha</label>
+                            <input type="password" id="loginPassword" required class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-900 mb-3 leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                        </div>
+                        <button type="submit" id="loginButton" class="w-full btn-primary text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
+                            Entrar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="dashboardView" style="display: none;">
+                <div class="bg-white p-6 rounded-xl shadow-panel border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-5 pb-2 border-b border-gray-200">Próximos Cultos & Histórico</h2>
+                    <div id="listaCultos" class="space-y-4">
+                        </div>
+                </div>
+            </div>
+
+            <div id="setlistView" style="display: none;">
+                <button id="btnVoltarHistorico" class="mb-4 text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center">&larr; Voltar ao Histórico</button>
+
+                <div class="bg-white p-6 rounded-xl shadow-panel border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2" id="setlistTitle">Montando Setlist: Culto [Data]</h2>
+                    <p class="text-sm text-gray-500 mb-4 italic">*Arraste os cards para reordenar a lista.</p>
+
+                    <div id="setlistCardsContainer" class="space-y-3">
+                        </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end space-x-3">
+                        <button id="btnExportarSetlist" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 text-sm rounded-lg shadow-md transition duration-150">
+                            📥 Exportar Setlist
+                        </button>
+                        
+                        <button id="btnAdicionarManual" class="btn-secondary-light font-medium py-2 px-4 text-sm rounded-lg shadow-sm">
+                            🔍 Buscar e Adicionar
+                        </button>
+                        <button id="btnSalvarSetlist" class="btn-primary text-white font-bold py-2 px-4 text-sm rounded-lg shadow-md">
+                            Salvar Setlist
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+        </main>
+
+        <div id="modalNovoCulto" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2">Planejar Novo Culto</h3>
+                <input type="hidden" id="cultoEditId">
+                <input type="date" id="inputData" class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                <input type="text" id="inputNome" placeholder="Nome do Culto (Ex: Domingo Noite)" class="w-full p-3 border border-gray-300 rounded-lg mb-6 text-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="fecharModal" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
+                    <button type="button" id="iniciarSelecao" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Iniciar Seleção</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalBuscaMusica" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2">Buscar e Adicionar Música</h3>
+                <input type="text" id="buscaInput" placeholder="Digite o nome, artista ou categoria..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                
+                <div id="resultadosBusca" class="flex-grow overflow-y-auto space-y-2 mb-4">
+                    </div>
+                
+                <div class="flex justify-end space-x-2 border-t pt-4">
+                    <button type="button" id="fecharModalBusca" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Fechar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalAcaoMusica" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2" id="acaoMusicaTitulo"></h3>
+                
+                <p class="mb-4 text-gray-700 text-sm">O que deseja fazer com esta música no Setlist?</p>
+                
+                <button type="button" id="btnAcaoAdicionar" class="w-full btn-primary text-white font-medium py-3 rounded-lg mb-3">
+                    + Adicionar ao Final
+                </button>
+                
+                <div class="mt-4 border-t pt-4" id="substituirContainer">
+                    <p class="mb-3 text-sm font-semibold text-gray-700">— OU SUBSTITUIR —</p>
+                    <label for="posicaoSubstituir" class="block text-sm font-medium text-gray-600">Substituir qual posição?</label>
+                    <select id="posicaoSubstituir" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500 mb-3"></select>
+                    <button type="button" id="btnAcaoSubstituir" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg text-sm">
+                        🔄 Substituir
+                    </button>
+                </div>
+                
+                <div class="flex justify-end space-x-2 border-t pt-4 mt-4">
+                    <button type="button" id="cancelarModalAcao" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
+                </div>
+                
+            </div>
+        </div>
+
+        <div id="modalTransposicao" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2">Alterar Tom (<span id="transposicaoMusicaNome"></span>)</h3>
+                
+                <p id="transposicaoTomAtual" class="mb-4 text-sm text-gray-600">Tom Original: <span class="font-bold text-gray-900"></span></p>
+
+                <div class="mb-4">
+                    <label for="novoTom" class="block text-sm font-medium text-gray-700">Novo Tom</label>
+                    <input type="text" id="novoTom" required placeholder="Ex: D, Eb, Bm" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button id="fecharModalTransposicao" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
+                    <button id="salvarNovoTom" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalImport" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2">Importar Repertório</h3>
+                <p class="mb-4 text-sm text-gray-600">Importe sua lista do Excel (CSV) para o banco de dados. Colunas: Nome, Artista/Versão, Categoria (Adoração/Palmas), Tom.</p>
+                <input type="file" id="fileInputCsv" accept=".csv" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <div class="flex justify-end space-x-2 mt-4">
+                    <button type="button" id="fecharModalImport" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
+                    <button type="button" id="iniciarImportacao" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Importar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="modalGerenciarRepertorio" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="text-xl font-bold">Gerenciar Repertório (Total: <span id="totalMusicas">0</span>)</h3>
+                    <button id="btnAddNewMusica" class="bg-green-600 hover:bg-green-700 text-white text-sm py-1 px-3 rounded-lg shadow-md">
+                        + Nova Música
+                    </button>
+                </div>
+                
+                <input type="text" id="filtroRepertorio" placeholder="Filtrar por nome, artista ou tom..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                
+                <div id="listaRepertorio" class="flex-grow overflow-y-auto space-y-2 mb-4">
+                    </div>
+                
+                <div class="flex justify-end space-x-2 border-t pt-4">
+                    <button type="button" id="fecharModalGerenciar" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Fechar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalEditarMusica" class="fixed inset-0 bg-gray-900 bg-opacity-80 hidden items-center justify-center p-4 z-50">
+            <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4 border-b pb-2" id="editarMusicaTitulo">Editar Música</h3>
+                <form id="formEditarMusica">
+                    <input type="hidden" id="editMusicaId">
+                    <div class="mb-3">
+                        <label for="editMusicaNome" class="block text-sm font-medium text-gray-700">Nome da Música</label>
+                        <input type="text" id="editMusicaNome" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editMusicaArtista" class="block text-sm font-medium text-gray-700">Artista/Versão</label>
+                        <input type="text" id="editMusicaArtista" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="flex space-x-4 mb-4">
+                        <div class="flex-1">
+                            <label for="editMusicaCategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
+                            <select id="editMusicaCategoria" required class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="Adoração">Adoração</option>
+                                <option value="Palmas">Palmas</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label for="editMusicaTom" class="block text-sm font-medium text-gray-700">Tom</label>
+                            <input type="text" id="editMusicaTom" required placeholder="Ex: C, Dm, G#" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="cancelarEditarMusica" class="btn-secondary-light font-medium py-2 px-4 rounded-lg text-sm">Cancelar</button>
+                        <button type="submit" class="btn-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    
+    <footer id="appFooter">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-xs text-gray-600 text-center">Development by Gustavo Ribeiro</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // -----------------------------------------------------------------
+        // 1. CONFIGURAÇÃO (SUAS CHAVES)
+        // -----------------------------------------------------------------
+        // ATENÇÃO: Ao hospedar no GitHub Pages, você PRECISA adicionar 
+        // o domínio do GitHub (ex: seuusuario.github.io) no Firebase Console:
+        // Vá em: Authentication -> Settings -> Authorized Domains -> Add Domain
+        const firebaseConfig = {
+            apiKey: "AIzaSyAx4n299JTMzwNqLfiMRMep2DHx4YzImYE",
+            authDomain: "app-abraao.firebaseapp.com",
+            projectId: "app-abraao",
+            storageBucket: "app-abraao.firebasestorage.app",
+            messagingSenderId: "805995656456",
+            appId: "1:805995656456:web:5a9284480ad56e5ee5a8bd",
+            measurementId: "G-X3MN0VTZX1"
+        };
+        
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = app.auth();
+        const db = app.firestore();
+        
+        const CULTOS_COLLECTION = 'cultos';
+        const REPERTORIO_COLLECTION = 'repertorio';
+        const USERS_COLLECTION = 'users';
+
+        // -----------------------------------------------------------------
+        // 2. ESTADO GLOBAL E CONTROLES
+        // -----------------------------------------------------------------
+        let userRole = null;
+        let repertorio = [];
+        let currentSetlist = []; 
+        let currentCulto = {};
+        let musicaSelecionadaParaAcao = null;
+        let musicaSendoTransposta = null; 
+        let indexMusicaSendoTransposta = -1;
+        let dragSrcEl = null;
+        let cultosHistorico = []; 
+
+        // Elementos do DOM
+        const loginView = document.getElementById('loginView');
+        const dashboardView = document.getElementById('dashboardView');
+        const setlistView = document.getElementById('setlistView');
+        const headerApp = document.getElementById('headerApp');
+        const listaCultosDiv = document.getElementById('listaCultos');
+        const setlistCardsContainer = document.getElementById('setlistCardsContainer');
+        const userRoleDisplay = document.getElementById('userRoleDisplay');
+        
+        const modalNovoCulto = document.getElementById('modalNovoCulto');
+        const modalImport = document.getElementById('modalImport');
+        const btnImportarCsv = document.getElementById('btnImportarCsv');
+
+        // Captura dos elementos de Login
+        const loginForm = document.getElementById('loginForm');
+        const loginStatus = document.getElementById('loginStatus');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+
+        // Modais de Setlist
+        const modalBuscaMusica = document.getElementById('modalBuscaMusica'); 
+        const modalAcaoMusica = document.getElementById('modalAcaoMusica');
+        const modalTransposicao = document.getElementById('modalTransposicao');
+        const buscaInput = document.getElementById('buscaInput');
+        const resultadosBusca = document.getElementById('resultadosBusca');
+        const posicaoSubstituir = document.getElementById('posicaoSubstituir');
+        const btnAdicionarManual = document.getElementById('btnAdicionarManual');
+        const fecharModalBusca = document.getElementById('fecharModalBusca');
+        const btnAcaoAdicionar = document.getElementById('btnAcaoAdicionar');
+        const btnAcaoSubstituir = document.getElementById('btnAcaoSubstituir');
+        const fecharModalTransposicao = document.getElementById('fecharModalTransposicao');
+        const salvarNovoTom = document.getElementById('salvarNovoTom');
+        const cancelarModalAcao = document.getElementById('cancelarModalAcao'); 
+
+        // Modais de Gerenciamento de Repertório
+        const modalGerenciarRepertorio = document.getElementById('modalGerenciarRepertorio');
+        const listaRepertorio = document.getElementById('listaRepertorio');
+        const filtroRepertorio = document.getElementById('filtroRepertorio');
+        const totalMusicas = document.getElementById('totalMusicas');
+        const fecharModalGerenciar = document.getElementById('fecharModalGerenciar');
+        const modalEditarMusica = document.getElementById('modalEditarMusica');
+        const formEditarMusica = document.getElementById('formEditarMusica');
+        const cancelarEditarMusica = document.getElementById('cancelarEditarMusica');
+        const fecharModal = document.getElementById('fecharModal');
+        const btnAddNewMusica = document.getElementById('btnAddNewMusica');
+        const appFooter = document.getElementById('appFooter');
+
+
+        // -----------------------------------------------------------------
+        // 3. GERENCIAMENTO DE VIEWS E PERMISSÕES
+        // -----------------------------------------------------------------
+
+        function showView(viewId) {
+            loginView.style.display = 'none';
+            dashboardView.style.display = 'none';
+            setlistView.style.display = 'none';
+            headerApp.style.display = 'none';
+            appFooter.style.display = 'none';
+
+            if (viewId === 'login') {
+                loginView.style.display = 'flex';
+            } else {
+                document.getElementById(viewId).style.display = 'block';
+                headerApp.style.display = 'flex';
+                appFooter.style.display = 'block';
+                const isAdmin = userRole === 'admin';
+                document.querySelectorAll('[data-admin]').forEach(el => {
+                    el.style.display = isAdmin ? 'inline-block' : 'none';
+                });
+            }
+        }
+        
+        async function fetchUserRole(user) {
+            try {
+                const docRef = db.collection(USERS_COLLECTION).doc(user.uid);
+                const docSnap = await docRef.get();
+                if (docSnap.exists) {
+                    userRole = docSnap.data().role;
+                } else {
+                    userRole = 'standard';
+                }
+                userRoleDisplay.textContent = `Permissão: ${userRole.toUpperCase()}`;
+            } catch (error) {
+                console.error("Erro ao buscar role:", error);
+                userRole = 'standard';
+            }
+            loadDashboard();
+        }
+
+        // -----------------------------------------------------------------
+        // 4. LÓGICA DE DADOS E DASHBOARD
+        // -----------------------------------------------------------------
+        
+        async function fetchRepertorio() {
+            try {
+                const snapshot = await db.collection(REPERTORIO_COLLECTION).get();
+                repertorio = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+            } catch (error) {
+                console.error("Erro ao carregar repertório:", error);
+            }
+        }
+
+        async function loadDashboard() {
+            if (!auth.currentUser) { showView('login'); return; }
+            
+            await fetchRepertorio();
+
+            try {
+                const snapshot = await db.collection(CULTOS_COLLECTION).orderBy('data', 'desc').get();
+                cultosHistorico = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
+                
+                renderCultos(cultosHistorico);
+                showView('dashboardView');
+
+            } catch (error) {
+                console.error("Erro ao carregar cultos:", error);
+            }
+        }
+
+        function renderCultos(cultos) {
+            listaCultosDiv.innerHTML = '';
+            
+            if (cultos.length === 0) { listaCultosDiv.innerHTML = '<p class="p-4 text-gray-500 italic">Nenhum culto cadastrado.</p>'; return; }
+
+            cultos.forEach(culto => {
+                const dataFormatada = new Date(culto.data + 'T12:00:00').toLocaleDateString('pt-BR');
+                const statusColorClass = culto.status === 'Realizado' ? 'bg-green-500 text-white' : 'bg-indigo-500 text-white';
+                
+                const card = document.createElement('div');
+                card.className = `p-4 bg-white rounded-lg shadow-sm flex justify-between items-center card-base card-${culto.status.toLowerCase()}`;
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-base text-gray-900">${culto.nome}</p>
+                        <p class="text-sm text-gray-600">Data: ${dataFormatada} | Músicas: ${culto.setlist_final ? culto.setlist_final.length : 0}</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusColorClass}">${culto.status}</span>
+                    </div>
+                    <div class="space-x-2 flex items-center">
+                        ${culto.status === 'Planejado' && userRole === 'admin' ? `
+                            <button data-id="${culto.id}" data-action="marcar-realizado" class="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded transition duration-150">
+                                ✅ Marcar como Realizado
+                            </button>
+                        ` : ''}
+                        
+                        <button data-id="${culto.id}" data-action="edit" class="text-indigo-600 hover:text-indigo-800 text-sm p-1 rounded transition duration-150" data-admin>
+                            ✏️ Editar
+                        </button>
+                        <button data-id="${culto.id}" data-action="delete" class="text-red-600 hover:text-red-800 text-sm p-1 rounded transition duration-150" data-admin>
+                            🗑️ Excluir
+                        </button>
+                    </div>
+                `;
+                listaCultosDiv.appendChild(card);
+            });
+            
+            // Adiciona Eventos de CRUD
+            listaCultosDiv.querySelectorAll('[data-action="edit"]').forEach(btn => {
+                btn.addEventListener('click', (e) => openModalNovoCulto(e.currentTarget.dataset.id));
+            });
+            listaCultosDiv.querySelectorAll('[data-action="delete"]').forEach(btn => {
+                btn.addEventListener('click', (e) => deleteCulto(e.currentTarget.dataset.id));
+            });
+            listaCultosDiv.querySelectorAll('[data-action="marcar-realizado"]').forEach(btn => {
+                btn.addEventListener('click', (e) => updateCultoStatus(e.currentTarget.dataset.id, 'Realizado'));
+            });
+            
+            const isAdmin = userRole === 'admin';
+            document.querySelectorAll('[data-admin]').forEach(el => { el.style.display = isAdmin ? 'inline-block' : 'none'; });
+        }
+
+        async function openModalNovoCulto(cultoId = null) {
+             if (userRole !== 'admin') { alert("Permissão negada. Apenas administradores podem planejar cultos."); return; }
+            
+            if (cultoId) {
+                try {
+                    const docSnap = await db.collection(CULTOS_COLLECTION).doc(cultoId).get();
+                    if (docSnap.exists) {
+                        const culto = docSnap.data();
+                        document.getElementById('cultoEditId').value = cultoId;
+                        document.getElementById('inputNome').value = culto.nome;
+                        document.getElementById('inputData').value = culto.data;
+                        document.getElementById('iniciarSelecao').textContent = 'Continuar Edição';
+                        
+                        currentSetlist = (culto.setlist_final || []).map(id => repertorio.find(m => m.id === id)).filter(m => m);
+                        currentCulto = { id: cultoId, data: culto.data, nome: culto.nome, status: culto.status };
+                    }
+                } catch (error) {
+                    console.error("Erro ao carregar culto para edição:", error);
+                    return;
+                }
+            } else {
+                document.getElementById('cultoEditId').value = '';
+                document.getElementById('inputNome').value = '';
+                document.getElementById('inputData').value = '';
+                document.getElementById('iniciarSelecao').textContent = 'Iniciar Seleção';
+                currentSetlist = [];
+                currentCulto = {};
+            }
+
+            modalNovoCulto.classList.add('modal-active');
+            modalNovoCulto.classList.remove('hidden');
+        }
+
+        async function deleteCulto(cultoId) {
+            if (userRole !== 'admin') { alert("Permissão negada. Apenas administradores podem excluir."); return; }
+            if (confirm("Tem certeza que deseja EXCLUIR este culto?")) {
+                try {
+                    await db.collection(CULTOS_COLLECTION).doc(cultoId).delete();
+                    alert("Culto excluído com sucesso.");
+                    loadDashboard();
+                } catch (error) {
+                    console.error("Erro ao excluir culto:", error);
+                    alert("Erro ao excluir culto.");
+                }
+            }
+        }
+        
+        async function updateCultoStatus(cultoId, newStatus) {
+            if (userRole !== 'admin') { alert("Permissão negada. Apenas administradores podem alterar o status."); return; }
+            if (confirm(`Tem certeza que deseja marcar este culto como "${newStatus}"?`)) {
+                try {
+                    await db.collection(CULTOS_COLLECTION).doc(cultoId).update({ status: newStatus });
+                    alert(`Status alterado para ${newStatus}.`);
+                    loadDashboard();
+                } catch (error) {
+                    console.error("Erro ao atualizar status:", error);
+                    alert("Erro ao atualizar status do culto.");
+                }
+            }
+        }
+        
+        function parseCSV(text) {
+            const lines = text.trim().split(/\r?\n/);
+            const newSongs = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                let values = line.split(';').map(v => v.trim().replace(/"/g, ''));
+                
+                if (values.length < 4) {
+                    values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                }
+                
+                if (values.length >= 4) {
+                    const nome = values[0];
+                    const artista_versao = values[1] || 'N/A';
+                    const categoria = values[2];
+                    const tom = values[3];
+                    
+                    if (nome && ['Adoração', 'Palmas'].includes(categoria)) {
+                        newSongs.push({
+                            nome: nome,
+                            artista_versao: artista_versao, 
+                            categoria: categoria,
+                            tom: tom
+                        });
+                    }
+                }
+            }
+            return newSongs;
+        }
+
+        function importarRepertorioCSV(file) {
+             if (userRole !== 'admin') { alert("Permissão negada. Apenas administradores podem importar."); return; }
+            
+            const reader = new FileReader();
+            reader.readAsText(file, 'ISO-8859-1');
+            
+            reader.onload = async (e) => {
+                const csvText = e.target.result;
+                const potentialNewSongs = parseCSV(csvText);
+                const songsToSave = [];
+                
+                potentialNewSongs.forEach(song => { songsToSave.push(song); }); 
+
+                if (songsToSave.length > 0) {
+                    try {
+                        const batch = db.batch();
+                        
+                        songsToSave.forEach(song => {
+                            const docRef = db.collection(REPERTORIO_COLLECTION).doc();
+                            batch.set(docRef, song);
+                        });
+
+                        await batch.commit();
+                        alert(`Importação concluída: ${songsToSave.length} músicas adicionadas ao Firestore. Use o Gerenciar Repertório para limpar duplicatas, se houver.`);
+                        
+                        document.getElementById('modalImport').classList.add('hidden');
+                        document.getElementById('modalImport').classList.remove('modal-active');
+
+                        fetchRepertorio(); 
+                        loadDashboard(); 
+                        
+                    } catch (error) {
+                        alert("Erro ao salvar no Firestore. Verifique as regras de segurança.");
+                        document.getElementById('modalImport').classList.add('hidden');
+                    }
+                } else {
+                    alert('Nenhuma música válida encontrada.');
+                }
+            };
+        }
+
+        // -----------------------------------------------------------------
+        // 5. LÓGICA DO SETLIST COMPLETA E GESTÃO DE REPERTÓRIO
+        // -----------------------------------------------------------------
+
+        function identificarMusicasBloqueadas() { return new Set(); }
+        function gerarSugestoes(repertorio, musicasBloqueadas, categoria, quantidade, setlistAtualIds = []) {
+             let candidatas = repertorio.filter(musica => 
+                musica.categoria === categoria && !musicasBloqueadas.has(musica.id));
+            candidatas = candidatas.filter(musica => !setlistAtualIds.includes(musica.id));
+            candidatas.sort(() => Math.random() - 0.5);
+            return candidatas.slice(0, quantidade);
+        }
+
+        async function saveSetlistToFirestore() {
+            if (userRole !== 'admin') { alert("Permissão negada."); return; }
+            
+            const dataInput = document.getElementById('inputData').value;
+            const dataCulto = dataInput; 
+
+            if (currentSetlist.length === 0 && !currentCulto.id) {
+                alert("O Setlist está vazio. O culto será salvo como Planejado. Adicione músicas depois clicando em 'Editar'.");
+            } else if (currentSetlist.length === 0 && currentCulto.id) {
+                 if (!confirm("O Setlist está vazio. Deseja salvar o culto sem músicas?")) {
+                        return; 
+                 }
+            }
+
+
+            const cultoId = currentCulto.id;
+            const setlistIds = currentSetlist.map(m => m.id);
+            
+            const cultoData = {
+                data: dataCulto, 
+                nome: currentCulto.nome,
+                status: currentCulto.status || 'Planejado', 
+                setlist_final: setlistIds
+            };
+            
+            try {
+                if (cultoId) {
+                    await db.collection(CULTOS_COLLECTION).doc(cultoId).update(cultoData);
+                    alert("Culto atualizado com sucesso!");
+                } else {
+                    await db.collection(CULTOS_COLLECTION).add(cultoData);
+                    alert("Novo culto salvo com sucesso!");
+                }
+                
+                document.getElementById('btnVoltarHistorico').click();
+
+            } catch (error) {
+                console.error("Erro ao salvar Setlist:", error);
+                alert("Erro ao salvar/editar o culto.");
+            }
+        }
+
+        // --- Drag-and-Drop Handlers ---
+        function handleDragStart(e) { dragSrcEl = e.currentTarget; e.dataTransfer.effectAllowed = 'move'; e.currentTarget.classList.add('dragging'); }
+        function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+        function handleDragLeave(e) { e.currentTarget.classList.remove('bg-gray-200'); }
+        function handleDragEnter(e) { e.currentTarget.classList.add('bg-gray-200'); }
+        function handleDragEnd(e) { e.currentTarget.classList.remove('dragging'); setlistCardsContainer.querySelectorAll('.bg-gray-200').forEach(el => el.classList.remove('bg-gray-200')); }
+        function handleDrop(e) {
+            e.stopPropagation(); e.currentTarget.classList.remove('bg-gray-200');
+            if (dragSrcEl !== e.currentTarget) {
+                const dragIndex = parseInt(dragSrcEl.getAttribute('data-index'));
+                const dropIndex = parseInt(e.currentTarget.getAttribute('data-index'));
+                const draggedMusica = currentSetlist[dragIndex];
+                currentSetlist.splice(dragIndex, 1);
+                currentSetlist.splice(dropIndex, 0, draggedMusica);
+                renderSetlist(); 
+            }
+        }
+        
+        // --- FUNÇÃO CORRIGIDA: Retorna apenas a DATA (string) ---
+        function getRecentPlays(musicaId) {
+            // Filtra apenas cultos realizados que contêm a música
+            const cultosComAMusica = cultosHistorico.filter(c => 
+                c.status === 'Realizado' && 
+                c.setlist_final && 
+                c.setlist_final.includes(musicaId)
+            );
+
+            if (cultosComAMusica.length === 0) {
+                return null; 
+            }
+            
+            // Ordena para pegar o mais recente
+            cultosComAMusica.sort((a, b) => new Date(b.data) - new Date(a.data));
+            const ultimoCulto = cultosComAMusica[0];
+            
+            // Formata a data para exibir (Forçando meio-dia para evitar fuso horário)
+            return new Date(ultimoCulto.data + 'T12:00:00').toLocaleDateString('pt-BR');
+        }
+
+        function renderCard(musica, index) {
+            if (!musica) return '';
+            const lastDate = getRecentPlays(musica.id); // Pega apenas a data string (ou null)
+            
+            // Lógica de cores removida (sempre branco/cinza padrão)
+            const bgColor = 'bg-white border-gray-300 hover:bg-gray-50';
+            const categoriaCor = musica.categoria === 'Adoração' ? 'text-indigo-600' : 'text-orange-500'; 
+            const textColor = 'text-gray-700';
+
+            return `
+                <div class="p-4 ${bgColor} rounded-lg border shadow-sm flex justify-between items-center cursor-grab"
+                    draggable="true" data-index="${index}">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-base ${textColor} truncate">
+                            <span class="text-2xl font-bold mr-3 ${categoriaCor}">${index + 1}.</span> ${musica.nome} - <span class="text-sm font-semibold text-indigo-600">${musica.tom}</span>
+                        </p>
+                        <p class="text-xs text-gray-600 truncate">${musica.artista_versao} | ${musica.categoria} 
+                            ${lastDate ? `<span class="text-xs text-gray-500 ml-2 font-medium">📅 Última vez: ${lastDate}</span>` : '<span class="text-xs text-green-600 ml-2 font-medium">🆕 Primeira vez</span>'}
+                        </p>
+                    </div>
+                    <div class="space-x-2 flex-shrink-0">
+                        <button data-index="${index}" data-action="transpor" class="text-indigo-600 hover:text-indigo-800 text-sm p-1 rounded transition duration-150">
+                            🎵 Transpor
+                        </button>
+                        <button data-index="${index}" data-action="remover" class="text-red-600 hover:text-red-800 text-sm p-1 rounded transition duration-150">
+                            ✖️ Remover
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function adicionarEventosDeInteracao() {
+            setlistCardsContainer.querySelectorAll('div[draggable="true"]').forEach(card => {
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('dragleave', handleDragLeave);
+                card.addEventListener('dragenter', handleDragEnter);
+                card.addEventListener('drop', handleDrop);
+                card.addEventListener('dragend', handleDragEnd);
+            });
+
+            setlistCardsContainer.querySelectorAll('[data-action="transpor"]').forEach(btn => {
+                btn.addEventListener('click', (e) => abrirModalTransposicao(parseInt(e.currentTarget.dataset.index)));
+            });
+
+            setlistCardsContainer.querySelectorAll('[data-action="remover"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (confirm("Deseja remover esta música do Setlist?")) {
+                        const index = parseInt(e.currentTarget.dataset.index);
+                        currentSetlist.splice(index, 1);
+                        renderSetlist();
+                    }
+                });
+            });
+        }
+        
+        function renderSetlist() {
+            setlistCardsContainer.innerHTML = '';
+            if (currentSetlist.length === 0) {
+                setlistCardsContainer.innerHTML = '<p class="p-4 text-gray-500 italic">O setlist está vazio. Use o botão "Buscar e Adicionar Música".</p>';
+            }
+
+            currentSetlist.forEach((musica, index) => {
+                const cardHtml = renderCard(musica, index);
+                setlistCardsContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+            
+            adicionarEventosDeInteracao(); 
+        }
+        
+        function iniciarMontagemSetlist(data, nome, cultoId = null) {
+            currentCulto.data = data;
+            currentCulto.nome = nome;
+            currentCulto.id = cultoId;
+            currentCulto.status = currentCulto.status || 'Planejado';
+
+            if (!cultoId) {
+                currentSetlist = []; 
+                if (repertorio.length > 0) {
+                     const musicasBloqueadas = identificarMusicasBloqueadas();
+                     const setlistAtualIds = currentSetlist.map(m => m.id);
+                     const sugestoesAdoracao = gerarSugestoes(repertorio, musicasBloqueadas, 'Adoração', 4, setlistAtualIds);
+                     const sugestoesPalmas = gerarSugestoes(repertorio, musicasBloqueadas, 'Palmas', 2, setlistAtualIds);
+                     currentSetlist = sugestoesAdoracao.concat(sugestoesPalmas).filter(m => m);
+                }
+            } 
+            
+            // CORREÇÃO DATA: T12:00:00 para exibição correta
+            document.getElementById('setlistTitle').textContent = `Montando Setlist: ${nome} (${new Date(data + 'T12:00:00').toLocaleDateString('pt-BR')})`;
+            
+            renderSetlist();
+            showView('setlistView');
+        }
+
+        // --- Transposição ---
+        function abrirModalTransposicao(index) { 
+            musicaSendoTransposta = currentSetlist[index];
+            indexMusicaSendoTransposta = index;
+
+            if (!musicaSendoTransposta) return;
+
+            document.getElementById('transposicaoMusicaNome').textContent = musicaSendoTransposta.nome;
+            document.getElementById('transposicaoTomAtual').querySelector('span').textContent = musicaSendoTransposta.tom;
+            document.getElementById('novoTom').value = musicaSendoTransposta.tom; 
+
+            modalTransposicao.classList.add('modal-active');
+            modalTransposicao.classList.remove('hidden');
+        }
+        
+        function salvarNovoTomNoSetlist() { 
+            const novoTomInput = document.getElementById('novoTom').value.trim();
+            if (!novoTomInput) {
+                alert("Por favor, digite um Tom válido.");
+                return;
+            }
+
+            if (musicaSendoTransposta && indexMusicaSendoTransposta !== -1) {
+                currentSetlist[indexMusicaSendoTransposta] = {
+                    ...currentSetlist[indexMusicaSendoTransposta],
+                    tom: novoTomInput 
+                };
+                
+                musicaSendoTransposta = null;
+                indexMusicaSendoTransposta = -1;
+
+                modalTransposicao.classList.add('hidden');
+                modalTransposicao.classList.remove('modal-active');
+                renderSetlist(); 
+            }
+        }
+        
+        // --- Busca e Adição ---
+        function buscarMusicas(termo) { 
+             if (!termo) return repertorio;
+
+            const termoLower = termo.toLowerCase();
+            const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            return repertorio.filter(musica => 
+                removeAccents(musica.nome).toLowerCase().includes(removeAccents(termoLower)) ||
+                removeAccents(musica.artista_versao).toLowerCase().includes(removeAccents(termoLower)) ||
+                removeAccents(musica.categoria).toLowerCase().includes(removeAccents(termoLower))
+            );
+        }
+        
+        function renderResultadosBusca(resultados) { 
+            resultadosBusca.innerHTML = '';
+            
+            if (resultados.length === 0) {
+                resultadosBusca.innerHTML = '<p class="p-4 text-gray-500 italic">Nenhuma música encontrada.</p>';
+                return;
+            }
+
+            resultados.forEach(musica => {
+                const card = document.createElement('div');
+                card.className = 'p-3 bg-white border border-gray-300 rounded-lg shadow-sm flex justify-between items-center hover:bg-indigo-50 transition duration-150 cursor-pointer';
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-base">${musica.nome}</p>
+                        <p class="text-xs text-gray-500">${musica.artista_versao} | ${musica.categoria} | Tom: ${musica.tom}</p>
+                    </div>
+                    <button data-id="${musica.id}" data-action="selecionar" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs px-2 py-1 rounded">
+                        Selecionar
+                    </button>
+                `;
+                resultadosBusca.appendChild(card);
+            });
+            
+            resultadosBusca.querySelectorAll('[data-action="selecionar"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const musica = repertorio.find(m => m.id === e.currentTarget.dataset.id);
+                    if (musica) {
+                        musicaSelecionadaParaAcao = musica;
+                        abrirModalAcaoMusica(musica);
+                    }
+                });
+            });
+        }
+        
+        function abrirModalAcaoMusica(musica) { 
+            musicaSelecionadaParaAcao = musica;
+            
+            document.getElementById('acaoMusicaTitulo').textContent = `Ação: ${musica.nome}`;
+            
+            const isSetlistEmpty = currentSetlist.length === 0;
+            document.getElementById('substituirContainer').style.display = isSetlistEmpty ? 'none' : 'block';
+
+            posicaoSubstituir.innerHTML = '';
+            currentSetlist.forEach((m, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${index + 1}. ${m.nome}`;
+                posicaoSubstituir.appendChild(option);
+            });
+            
+            if (!isSetlistEmpty) {
+                posicaoSubstituir.value = 0; 
+            }
+
+
+            modalBuscaMusica.classList.add('hidden');
+            modalAcaoMusica.classList.add('modal-active');
+            modalAcaoMusica.classList.remove('hidden');
+        }
+        
+        function realizarSubstituicao(musica, indexSubstituir) {
+            const indexExistente = currentSetlist.findIndex(m => m.id === musica.id);
+            if (indexExistente !== -1 && indexExistente !== indexSubstituir) { alert(`"${musica.nome}" já está no Setlist na posição ${indexExistente + 1}.`); return; }
+
+            currentSetlist.splice(indexSubstituir, 1, {...musica}); 
+            alert(`"${musica.nome}" substituiu a posição ${indexSubstituir + 1}.`);
+            
+            modalAcaoMusica.classList.add('hidden');
+            renderSetlist(); 
+        }
+
+        function realizarAdicao(musica) {
+            const indexExistente = currentSetlist.findIndex(m => m.id === musica.id);
+            if (indexExistente !== -1) { alert(`"${musica.nome}" já está no Setlist na posição ${indexExistente + 1}.`); return; }
+            
+            currentSetlist.push({...musica}); 
+            alert(`"${musica.nome}" adicionada ao final do Setlist.`);
+            
+            modalAcaoMusica.classList.add('hidden');
+            renderSetlist(); 
+        }
+
+        // --- Exportação ---
+        function exportarSetlist() {
+            if (currentSetlist.length === 0) { alert("O Setlist está vazio. Não há o que exportar."); return; }
+            
+            // CORREÇÃO DATA: T12:00:00 para exportação
+            let output = `--- Setlist - ${currentCulto.nome} (${new Date(currentCulto.data + 'T12:00:00').toLocaleDateString('pt-BR')}) ---\n`;
+            
+            currentSetlist.forEach((musica, index) => {
+                output += `${index + 1}. ${musica.nome} - Tom: ${musica.tom} (${musica.categoria})\n`;
+                output += `   Artista/Versão: ${musica.artista_versao}\n`;
+            });
+            output += `\n--------------------------------\nAbraão App - Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
+            
+            navigator.clipboard.writeText(output).then(() => {
+                alert("Setlist copiado para a área de transferência! (CTRL+V para colar no WhatsApp/Email)");
+            }).catch(() => {
+                const exportWindow = window.open("", "Setlist Export", "width=600,height=400");
+                exportWindow.document.write(`<pre>${output}</pre>`);
+                exportWindow.document.close();
+            });
+        }
+        
+        // --- Repertório CRUD ---
+        
+        async function renderGerenciarRepertorio(filtro = '') {
+            totalMusicas.textContent = repertorio.length;
+            listaRepertorio.innerHTML = '';
+            
+            const termoLower = filtro.toLowerCase();
+            const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            const filteredRepertorio = repertorio.filter(musica => 
+                removeAccents(musica.nome).toLowerCase().includes(removeAccents(termoLower)) ||
+                removeAccents(musica.artista_versao).toLowerCase().includes(removeAccents(termoLower)) ||
+                removeAccents(musica.tom).toLowerCase().includes(removeAccents(termoLower))
+            );
+
+            filteredRepertorio.forEach(musica => {
+                const card = document.createElement('div');
+                card.className = 'p-3 bg-white border border-gray-300 rounded-lg shadow-sm flex justify-between items-center';
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-base">${musica.nome}</p>
+                        <p class="text-xs text-gray-500">${musica.artista_versao} | ${musica.categoria} | Tom: ${musica.tom}</p>
+                    </div>
+                    <div class="space-x-2">
+                        <button data-id="${musica.id}" data-action="edit-musica" class="text-indigo-600 hover:text-indigo-800 text-sm p-1 rounded">✏️ Editar</button>
+                        <button data-id="${musica.id}" data-action="delete-musica" class="text-red-600 hover:text-red-800 text-sm p-1 rounded">🗑️ Excluir</button>
+                    </div>
+                `;
+                listaRepertorio.appendChild(card);
+            });
+            
+            listaRepertorio.querySelectorAll('[data-action="edit-musica"]').forEach(btn => {
+                btn.addEventListener('click', (e) => openModalEditarMusica(e.currentTarget.dataset.id));
+            });
+            listaRepertorio.querySelectorAll('[data-action="delete-musica"]').forEach(btn => {
+                btn.addEventListener('click', (e) => deleteMusica(e.currentTarget.dataset.id));
+            });
+        }
+        
+        // CORREÇÃO: Função openModalEditarMusica atualizada para suportar adição (null) e edição
+        async function openModalEditarMusica(musicaId) {
+            if (userRole !== 'admin') { return; }
+
+            if (musicaId) {
+                // MODO EDIÇÃO: Busca a música pelo ID
+                const musica = repertorio.find(m => m.id === musicaId);
+                if (!musica) return;
+
+                document.getElementById('editarMusicaTitulo').textContent = `Editar: ${musica.nome}`;
+                document.getElementById('editMusicaId').value = musica.id;
+                document.getElementById('editMusicaNome').value = musica.nome;
+                document.getElementById('editMusicaArtista').value = musica.artista_versao;
+                document.getElementById('editMusicaCategoria').value = musica.categoria;
+                document.getElementById('editMusicaTom').value = musica.tom;
+            } else {
+                // MODO ADICIONAR (NOVO): Limpa os campos
+                document.getElementById('editarMusicaTitulo').textContent = 'Nova Música';
+                document.getElementById('editMusicaId').value = ''; // ID vazio indica criação
+                document.getElementById('editMusicaNome').value = '';
+                document.getElementById('editMusicaArtista').value = '';
+                document.getElementById('editMusicaCategoria').value = 'Adoração'; // Default
+                document.getElementById('editMusicaTom').value = '';
+            }
+
+            modalEditarMusica.classList.add('modal-active');
+            modalEditarMusica.classList.remove('hidden');
+        }
+
+        async function saveMusicaChanges(e) {
+            e.preventDefault();
+            const musicaId = document.getElementById('editMusicaId').value;
+            if (userRole !== 'admin') { return; }
+
+            const updatedData = {
+                nome: document.getElementById('editMusicaNome').value,
+                artista_versao: document.getElementById('editMusicaArtista').value,
+                categoria: document.getElementById('editMusicaCategoria').value,
+                tom: document.getElementById('editMusicaTom').value,
+            };
+
+            try {
+                if (musicaId) {
+                     // Atualizar existente
+                    await db.collection(REPERTORIO_COLLECTION).doc(musicaId).update(updatedData);
+                    alert(`Música ${updatedData.nome} atualizada!`);
+                } else {
+                    // Adicionar novo
+                    await db.collection(REPERTORIO_COLLECTION).add(updatedData);
+                    alert(`Música ${updatedData.nome} adicionada com sucesso!`);
+                }
+                
+                modalEditarMusica.classList.add('hidden');
+                modalEditarMusica.classList.remove('modal-active');
+                
+                await fetchRepertorio();
+                renderGerenciarRepertorio(filtroRepertorio.value);
+            } catch (error) {
+                console.error("Erro ao salvar música:", error);
+                alert("Erro ao salvar as alterações da música.");
+            }
+        }
+
+        async function deleteMusica(musicaId) {
+            if (userRole !== 'admin') { return; }
+            if (confirm("Tem certeza que deseja EXCLUIR esta música do repertório?")) {
+                try {
+                    await db.collection(REPERTORIO_COLLECTION).doc(musicaId).delete();
+                    alert("Música excluída com sucesso.");
+                    await fetchRepertorio();
+                    renderGerenciarRepertorio(filtroRepertorio.value);
+                } catch (error) {
+                    console.error("Erro ao excluir música:", error);
+                    alert("Erro ao excluir música.");
+                }
+            }
+        }
+        
+        // -----------------------------------------------------------------
+        // 7. EVENT LISTENERS E INICIALIZAÇÃO
+        // -----------------------------------------------------------------
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. HANDLER DE LOGIN
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const email = loginEmail.value;
+                    const password = loginPassword.value;
+                    
+                    loginStatus.innerHTML = '<p class="text-gray-600">Conectando...</p>';
+
+                    try {
+                        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                        await fetchUserRole(userCredential.user);
+                        
+                    } catch (error) {
+                        let errorMessage = "E-mail ou senha incorretos.";
+                        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                            errorMessage = "E-mail ou senha incorretos. Tente novamente.";
+                        } else {
+                            errorMessage = `Erro desconhecido: ${error.message}`;
+                        }
+                        
+                        loginStatus.innerHTML = `<p class="bg-red-200 text-red-800 p-2 rounded">${errorMessage}</p>`;
+                        console.error("Erro no login:", error);
+                    }
+                });
+            }
+
+            // 2. OUTROS LISTENERS DE NAVEGAÇÃO E AÇÃO
+            
+            document.getElementById('btnLogout').addEventListener('click', () => { auth.signOut().then(() => showView('login')); });
+            document.getElementById('btnNovoCulto').addEventListener('click', () => { openModalNovoCulto(); });
+            document.getElementById('btnVoltarHistorico').addEventListener('click', loadDashboard);
+            document.getElementById('btnSalvarSetlist').addEventListener('click', saveSetlistToFirestore);
+            document.getElementById('btnExportarSetlist').addEventListener('click', exportarSetlist);
+
+
+            // Fechar Modal Novo Culto (Modal 1)
+            if (fecharModal) {
+                 fecharModal.addEventListener('click', () => {
+                     modalNovoCulto.classList.add('hidden');
+                     modalNovoCulto.classList.remove('modal-active');
+                 });
+            }
+            
+            // Iniciar Seleção (Abre Setlist View)
+            document.getElementById('iniciarSelecao').addEventListener('click', () => {
+                const dataCulto = document.getElementById('inputData').value;
+                const nomeCulto = document.getElementById('inputNome').value || `Culto de ${new Date(dataCulto).toLocaleDateString('pt-BR')}`;
+                const cultoId = document.getElementById('cultoEditId').value;
+                
+                if (!dataCulto) { alert("Por favor, selecione a data."); return; }
+                
+                modalNovoCulto.classList.add('hidden');
+                modalNovoCulto.classList.remove('modal-active');
+                
+                iniciarMontagemSetlist(dataCulto, nomeCulto, cultoId);
+            });
+            
+            // Busca e Adição
+            if(btnAdicionarManual) {
+                btnAdicionarManual.addEventListener('click', () => {
+                    buscaInput.value = '';
+                    renderResultadosBusca(repertorio);
+                    modalBuscaMusica.classList.add('modal-active');
+                    modalBuscaMusica.classList.remove('hidden');
+                });
+            }
+            if(buscaInput) { buscaInput.addEventListener('input', () => { renderResultadosBusca(buscarMusicas(buscaInput.value)); }); }
+            
+            // Fechar Modal Busca
+            if(fecharModalBusca) { fecharModalBusca.addEventListener('click', () => {
+                 modalBuscaMusica.classList.add('hidden');
+                 modalBuscaMusica.classList.remove('modal-active');
+            }); }
+            
+            // Ações de Substituição/Adição
+            if(btnAcaoAdicionar) { btnAcaoAdicionar.addEventListener('click', () => { if (musicaSelecionadaParaAcao) { realizarAdicao(musicaSelecionadaParaAcao); } }); }
+            if(btnAcaoSubstituir) { btnAcaoSubstituir.addEventListener('click', () => { 
+                if (musicaSelecionadaParaAcao) { realizarSubstituicao(musicaSelecionadaParaAcao, parseInt(posicaoSubstituir.value)); }
+            }); }
+            
+            // CORREÇÃO: Botão de Cancelar Modal Ação (Modal 3)
+            if(cancelarModalAcao) { 
+                cancelarModalAcao.addEventListener('click', () => { 
+                    modalAcaoMusica.classList.add('hidden');
+                    modalAcaoMusica.classList.remove('modal-active');
+                    
+                    // Retorna para o modal de busca
+                    modalBuscaMusica.classList.remove('hidden'); 
+                    modalBuscaMusica.classList.add('modal-active');
+                }); 
+            }
+            
+            // Transposição
+            if(fecharModalTransposicao) { fecharModalTransposicao.addEventListener('click', () => modalTransposicao.classList.add('hidden')); }
+            if(salvarNovoTom) { salvarNovoTom.addEventListener('click', salvarNovoTomNoSetlist); }
+
+            // Exportação
+            document.getElementById('btnExportarSetlist').addEventListener('click', exportarSetlist);
+
+
+            // Importação CSV
+            if (btnImportarCsv) {
+                btnImportarCsv.addEventListener('click', () => {
+                    if (userRole === 'admin') { modalImport.classList.remove('hidden'); modalImport.classList.add('modal-active'); } else { alert("Permissão negada."); }
+                });
+            }
+            document.getElementById('iniciarImportacao').addEventListener('click', () => {
+                const file = document.getElementById('fileInputCsv').files[0];
+                if (file) { importarRepertorioCSV(file); } else { alert("Selecione um arquivo CSV."); }
+            });
+            document.getElementById('fecharModalImport').addEventListener('click', () => modalImport.classList.add('hidden'));
+            
+            // --- Gerenciamento de Repertório LISTENERS ---
+            document.getElementById('btnGerenciarRepertorio').addEventListener('click', () => {
+                modalGerenciarRepertorio.classList.remove('hidden');
+                modalGerenciarRepertorio.classList.add('modal-active');
+                renderGerenciarRepertorio();
+            });
+            // Adicionar Nova Música (Botão dentro do Modal 6)
+            if (btnAddNewMusica) {
+                btnAddNewMusica.addEventListener('click', () => {
+                    modalGerenciarRepertorio.classList.add('hidden');
+                    openModalEditarMusica(null); // Abre o modal em modo ADD
+                });
+            }
+
+            // Fechar Modal Gerenciar Repertório
+            if (fecharModalGerenciar) {
+                fecharModalGerenciar.addEventListener('click', () => {
+                    modalGerenciarRepertorio.classList.add('hidden');
+                    modalGerenciarRepertorio.classList.remove('modal-active');
+                });
+            }
+            filtroRepertorio.addEventListener('input', () => renderGerenciarRepertorio(filtroRepertorio.value));
+            
+            // Edição Individual de Música
+            formEditarMusica.addEventListener('submit', saveMusicaChanges);
+            // Fechar Modal Editar Música
+            if (cancelarEditarMusica) {
+                cancelarEditarMusica.addEventListener('click', () => {
+                    modalEditarMusica.classList.add('hidden');
+                    modalEditarMusica.classList.remove('modal-active');
+                    // Retorna para o modal de Gerenciamento
+                    modalGerenciarRepertorio.classList.remove('hidden');
+                });
+            }
+
+            // 3. VERIFICAÇÃO INICIAL DE AUTENTICAÇÃO
+            auth.onAuthStateChanged((user) => {
+                if (user) { fetchUserRole(user); } else { showView('login'); }
+            });
+
+        }); // Fim do DOMContentLoaded
+    </script>
+</body>
+</html>
